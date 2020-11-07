@@ -74,16 +74,18 @@ class ReflexAgent(Agent):
 
         score = 0
         minimo = 0
+
         for food in newFood:
             path = util.manhattanDistance(food, newPos)
-            if path > minimo:
-                minimo = path
+            "to try not to stop the Pacman"
+            if path < 10000:
                 score = score + (1 / path)
+
 
         for ghost in newGhostStates:
             ghostpos = ghost.getPosition()
             manhattan = util.manhattanDistance(newPos, ghostpos)
-            if manhattan > 1:
+            if manhattan >1:
                 score = score + (1 / manhattan)
             else:
                 if ghost.scaredTimer >= 1:
@@ -91,8 +93,10 @@ class ReflexAgent(Agent):
                 else:
                     score = -999999999
 
+
+
         if action == 'Stop':
-            score = score - 999
+            score = - 999999999
 
         return score + successorGameState.getScore()
 
@@ -229,81 +233,45 @@ def betterEvaluationFunction(currentGameState):
     """
     "*** YOUR CODE HERE ***"
     newPos = currentGameState.getPacmanPosition()
-    newFood = currentGameState.getFood()
+    newFood = currentGameState.getFood().asList()
     newGhostStates = currentGameState.getGhostStates()
     newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-    score = 400
-    foodList = newFood.asList()
-    for food in foodList:
-        difCoord = abs(food[0] - newPos[0]) + abs(food[1] - newPos[1])
+    score = 0
+    minimo = 0
 
-        if (difCoord == 0):
-            score = score + 10
+    for food in newFood:
+        path = util.manhattanDistance(food, newPos)
+        "to try not to stop the Pacman"
+        if path < 10000:
+            score = score + (1 / path)
+
+
+    for ghost in newGhostStates:
+
+        ghostpos = ghost.getPosition()
+        manhattan = util.manhattanDistance(newPos, ghostpos)
+
+        "For the capsules in the map"
+        for capsule in currentGameState.getCapsules():
+            path = util.manhattanDistance(capsule, newPos)
+            if path <= 2 and util.manhattanDistance(capsule, ghostpos) > 2 :
+                minimo = path
+                score = score + (1 / path)
+
+        if manhattan > 1:
+            score = score + (1 / manhattan)
         else:
-            if (difCoord == 1):
-                score = score + 8
+            if ghost.scaredTimer >= 1:
+                score = score + (1 / manhattan)
             else:
-                if (difCoord == 2):
-                    score = score + 6
-                else:
-                    if (difCoord == 3):
-                        score = score + 4
-                    else:
-                        if (difCoord == 4):
-                            score = score + 3
-                        else:
-                            if (difCoord == 5):
-                                score = score + 2
-                            else:
-                                if (difCoord == 6):
-                                    score = score + 1
-    randScore = random.randrange(10)
-    score = score + randScore
-    "#Esta es la linea nueva que cambia todo"
-    if (newScaredTimes[0] == 0):
-        for ghost in newGhostStates:
-            ghPos = ghost.getPosition()
-            difCoord = abs(ghPos[0] - newPos[0]) + abs(ghPos[1] - newPos[1])
-            if (difCoord == 0):
-                score = score - 40
-            else:
-                if (difCoord == 1):
-                    score = score - 300
-                else:
-                    if (difCoord == 2):
-                        score = score - 220
-                    else:
-                        if (difCoord == 3):
-                            score = score - 160
-                        else:
-                            if (difCoord == 4):
-                                score = score - 40
-    else:
-        for ghost in newGhostStates:
-            ghPos = ghost.getPosition()
-            difCoord = abs(ghPos[0] - newPos[0]) + abs(ghPos[1] - newPos[1])
-            if (difCoord == 0):
-                f = 12
-            else:
-                if (difCoord == 1):
-                    f = 11
-                else:
-                    if (difCoord == 2):
-                        f = 10
-                    else:
-                        if (difCoord == 3):
-                            f = 9
-                        else:
-                            if (difCoord == 4):
-                                f = 8
-                            else:
-                                f = 1
-            score = score + (f*(newScaredTimes[0]/2))
+                score = -999999999
 
-    comidasRestantes = len(foodList)
+
+
+
     puntosFuerzaRestantes = len(currentGameState.getCapsules())
-    score = score + (120-(comidasRestantes*2)) + puntosFuerzaRestantes*4.2
+    score = score + len(newFood) - puntosFuerzaRestantes
     return score + scoreEvaluationFunction(currentGameState)
 
 # Abbreviation
