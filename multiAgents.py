@@ -74,18 +74,16 @@ class ReflexAgent(Agent):
 
         score = 0
         minimo = 0
-
         for food in newFood:
             path = util.manhattanDistance(food, newPos)
-            "to try not to stop the Pacman"
-            if path < 10000:
+            if path > minimo:
+                minimo = path
                 score = score + (1 / path)
-
 
         for ghost in newGhostStates:
             ghostpos = ghost.getPosition()
             manhattan = util.manhattanDistance(newPos, ghostpos)
-            if manhattan >1:
+            if manhattan > 1:
                 score = score + (1 / manhattan)
             else:
                 if ghost.scaredTimer >= 1:
@@ -93,10 +91,8 @@ class ReflexAgent(Agent):
                 else:
                     score = -999999999
 
-
-
         if action == 'Stop':
-            score = - 999999999
+            score = score - 999
 
         return score + successorGameState.getScore()
 
@@ -159,7 +155,37 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def maxValue(state, depth, agentIndex):
+            depth -= 1
+            if depth < 0 or state.isLose() or state.isWin():
+                return (self.evaluationFunction(state),None)
+            maxScore = float("-inf")
+            for action in state.getLegalActions(agentIndex):
+                successor = state.generateSuccessor(agentIndex, action)
+                minScore = minValue(successor, depth, agentIndex + 1)[0]
+                if minScore > maxScore:
+                    maxScore = minScore
+                    maxAction = action
+            return (maxScore, maxAction)
+
+        def minValue(state, depth, agentIndex):
+            if state.isLose() or state.isWin():
+                return (self.evaluationFunction(state),None)
+            minScore = float("inf")
+            if(agentIndex < state.getNumAgents() - 1):
+                metod,nAgentIndex= (minValue,agentIndex+1)
+            else:
+                metod,nAgentIndex = (maxValue,0)
+            for action in state.getLegalActions(agentIndex):
+                successor = state.generateSuccessor(agentIndex, action)
+                score=metod(successor, depth, nAgentIndex)[0]
+                if score < minScore:
+                    minScore = score
+                    minAction = action
+            return (minScore, minAction)
+
+        return maxValue(gameState, self.depth, 0)[1]
+
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
@@ -171,7 +197,43 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        def maxValue(state, depth, agentIndex, alpha, beta):
+            depth -= 1
+            if depth < 0 or state.isLose() or state.isWin():
+                return (self.evaluationFunction(state), None)
+            maxScore = float("-inf")
+            for action in state.getLegalActions(agentIndex):
+                successor = state.generateSuccessor(agentIndex, action)
+                minScore = minValue(successor, depth, agentIndex + 1,alpha,beta)[0]
+                if minScore > maxScore:
+                    maxScore = minScore
+                    maxAction = action
+                if maxScore > beta :
+                    return (maxScore, maxAction)
+                alpha=max(maxScore,alpha)
+            return (maxScore, maxAction)
+
+        def minValue(state, depth, agentIndex, alpha, beta):
+            if state.isLose() or state.isWin():
+                return (self.evaluationFunction(state), None)
+            minScore = float("inf")
+            if (agentIndex < state.getNumAgents() - 1):
+                metod, nAgentIndex = (minValue, agentIndex + 1)
+            else:
+                metod, nAgentIndex = (maxValue, 0)
+            for action in state.getLegalActions(agentIndex):
+                successor = state.generateSuccessor(agentIndex, action)
+                score = metod(successor, depth, nAgentIndex, alpha, beta)[0]
+                if score < minScore:
+                    minScore = score
+                    minAction = action
+                if minScore < alpha :
+                    return (minScore, minAction)
+                beta=min(minScore,beta)
+            return (minScore, minAction)
+
+        return maxValue(gameState, self.depth, 0,float("-inf"),float("inf"))[1]
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
@@ -242,37 +304,34 @@ def betterEvaluationFunction(currentGameState):
 
     for food in newFood:
         path = util.manhattanDistance(food, newPos)
-        "to try not to stop the Pacman"
         if path < 10000:
             score = score + (1 / path)
 
 
     for ghost in newGhostStates:
-
         ghostpos = ghost.getPosition()
         manhattan = util.manhattanDistance(newPos, ghostpos)
-
-        "For the capsules in the map"
-        for capsule in currentGameState.getCapsules():
-            path = util.manhattanDistance(capsule, newPos)
-            if path <= 2 and util.manhattanDistance(capsule, ghostpos) > 2 :
-                minimo = path
-                score = score + (1 / path)
-
-        if manhattan > 1:
+        if manhattan >1:
             score = score + (1 / manhattan)
         else:
             if ghost.scaredTimer >= 1:
                 score = score + (1 / manhattan)
             else:
                 score = -999999999
+                return score
 
-
+        for capsule in currentGameState.getCapsules():
+            path = util.manhattanDistance(capsule, newPos)
+            if path <= 2 and util.manhattanDistance(capsule, ghostpos) > 2 :
+                minimo = path
+                score = score + (1 / path)
 
 
     puntosFuerzaRestantes = len(currentGameState.getCapsules())
     score = score + len(newFood) - puntosFuerzaRestantes
     return score + scoreEvaluationFunction(currentGameState)
+
+
 
 # Abbreviation
 better = betterEvaluationFunction
