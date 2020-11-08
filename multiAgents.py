@@ -73,7 +73,6 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         score = 0
-        minimo = 0
         for food in newFood:
             score = score + (1 / util.manhattanDistance(food, newPos))
 
@@ -295,7 +294,6 @@ def betterEvaluationFunction(currentGameState):
     newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
     score = 0
-    minimo = 0
 
     for food in newFood:
         score = score + (1 / util.manhattanDistance(food, newPos))
@@ -316,7 +314,6 @@ def betterEvaluationFunction(currentGameState):
         for capsule in currentGameState.getCapsules():
             path = util.manhattanDistance(capsule, newPos)
             if path <= 2 and util.manhattanDistance(capsule, ghostpos) > 2 :
-                minimo = path
                 score = score + (1 / path)
 
 
