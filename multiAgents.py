@@ -75,10 +75,7 @@ class ReflexAgent(Agent):
         score = 0
         minimo = 0
         for food in newFood:
-            path = util.manhattanDistance(food, newPos)
-            if path < 10000:
-                score = score + (1 / path)
-
+            score = score + (1 / util.manhattanDistance(food, newPos))
 
         for ghost in newGhostStates:
             ghostpos = ghost.getPosition()
@@ -91,7 +88,7 @@ class ReflexAgent(Agent):
                 else:
                     score = -999999999
                     return score
-                
+
         return score + successorGameState.getScore()
 
 def scoreEvaluationFunction(currentGameState):
@@ -301,9 +298,7 @@ def betterEvaluationFunction(currentGameState):
     minimo = 0
 
     for food in newFood:
-        path = util.manhattanDistance(food, newPos)
-        if path < 10000:
-            score = score + (1 / path)
+        score = score + (1 / util.manhattanDistance(food, newPos))
 
 
     for ghost in newGhostStates:
