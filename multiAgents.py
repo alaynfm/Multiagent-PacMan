@@ -76,24 +76,22 @@ class ReflexAgent(Agent):
         minimo = 0
         for food in newFood:
             path = util.manhattanDistance(food, newPos)
-            if path > minimo:
-                minimo = path
+            if path < 10000:
                 score = score + (1 / path)
+
 
         for ghost in newGhostStates:
             ghostpos = ghost.getPosition()
             manhattan = util.manhattanDistance(newPos, ghostpos)
-            if manhattan > 1:
+            if manhattan >1:
                 score = score + (1 / manhattan)
             else:
                 if ghost.scaredTimer >= 1:
                     score = score + (1 / manhattan)
                 else:
                     score = -999999999
-
-        if action == 'Stop':
-            score = score - 999
-
+                    return score
+                
         return score + successorGameState.getScore()
 
 def scoreEvaluationFunction(currentGameState):
